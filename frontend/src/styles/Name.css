@@ -1,0 +1,31 @@
+/* styles/Name.css */
+
+.name-container {
+    position: fixed;            /* Fixes the position on the screen */
+    top: -25px;                  /* Adds space from the top edge */
+    left: 10px;                 /* Adds space from the left edge */
+    display: flex;              /* Aligns children horizontally */
+    align-items: center;        /* Centers items vertically */
+    gap: 10px;                  /* Adds space between the text and the logo */
+    font-family: Arial, sans-serif; 
+    font-weight: bold;          /* Makes the text bold */
+    font-size: 16px;            /* Adjusts the font size */
+    color: #333;                /* Dark color for the text */
+    z-index: 1000;              /* Ensures the name is on top of other content */
+  }
+  
+  /* Style for the h1 element */
+  .name-container .ober  {
+    color: #ffffff;                /* Dark color for the text */
+  }
+
+  .name-container .wat {
+    color: #ffb300;                /* Dark color for the text */
+
+  }
+  
+  .name-container img {
+    height: 40px;               /* Adjust logo height */
+    width: auto;                /* Keeps logo aspect ratio */
+  }
+  

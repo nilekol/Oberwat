@@ -1,0 +1,32 @@
+/* styles/SearchBar.css */
+
+.search-bar {
+    position: fixed;  /* Fixes it in place even when scrolling */
+    top: 20px;        /* Space from the top of the page (optional) */
+    right: 20px;      /* Space from the right edge of the page (optional) */
+    display: flex;    /* Aligns input and button horizontally */
+    gap: 10px;        /* Adds space between the input field and button */
+    z-index: 1000;    /* Ensures it appears on top of other elements */
+  }
+  
+  .search-bar input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .search-bar button {
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .search-bar button:hover {
+    background-color: #0056b3;
+  }
+  
