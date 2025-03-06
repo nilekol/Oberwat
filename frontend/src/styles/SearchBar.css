@@ -1,13 +1,14 @@
 /* styles/SearchBar.css */
 
 .search-bar {
-    position: fixed;  /* Fixes it in place even when scrolling */
-    top: 20px;        /* Space from the top of the page (optional) */
-    right: 20px;      /* Space from the right edge of the page (optional) */
-    display: flex;    /* Aligns input and button horizontally */
-    gap: 10px;        /* Adds space between the input field and button */
-    z-index: 1000;    /* Ensures it appears on top of other elements */
-  }
+  position: fixed;   /* Fixes it to the screen */
+  top: 20px;            /* Places it at the top of the window */
+  right: 50px;       /* Space from the right edge */
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+}
+
   
   .search-bar input {
     padding: 8px;

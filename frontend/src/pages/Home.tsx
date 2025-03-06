@@ -1,13 +1,17 @@
-import SearchBar from '../components/SearchBar';
-import Name from '../components/Name';
+//import SearchBar from '../components/SearchBar';
+//import Name from '../components/Name';
+import Navbar from '../components/Navbar';
 
 function Home() {
     return (
         <div>
-            <SearchBar onSearch={(query) => console.log(query)} />
-            <Name/>
+            <Navbar />
+            
             <h1>Home</h1>
+        
         </div>
+
+
     )
 }
 

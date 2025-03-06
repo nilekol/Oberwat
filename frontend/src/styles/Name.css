@@ -2,7 +2,7 @@
 
 .name-container {
     position: fixed;            /* Fixes the position on the screen */
-    top: -25px;                  /* Adds space from the top edge */
+    top: -30px;                  /* Adds space from the top edge */
     left: 10px;                 /* Adds space from the left edge */
     display: flex;              /* Aligns children horizontally */
     align-items: center;        /* Centers items vertically */
