@@ -16,6 +16,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeholder = "Search...", onSear
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(query);
+    
   };
 
   return (

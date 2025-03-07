@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 )
@@ -22,17 +23,22 @@ var rdb = redis.NewClient(&redis.Options{
 })
 
 // Simulated function to fetch player stats from an external API
-func fetchPlayerSummary(battletag string) (map[string]interface{}, error) {
-	url := fmt.Sprintf("https://overfast-api.tekrop.fr/players/%s/summary", battletag)
+func fetchPlayerCareerSummary(battletag string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("https://overfast-api.tekrop.fr/players/%s", battletag)
 	log.Println("Fetching player summary data from API:", url) // Debug statement
-	resp, err := http.Get(url)
+	res, err := http.Get(url)
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("player stats not found")
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
 	var data map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&data)
+	json.NewDecoder(res.Body).Decode(&data)
 	return data, nil
 }
 
@@ -41,9 +47,15 @@ func fetchPlayerStats(battletag string) (map[string]interface{}, error) {
 	url := fmt.Sprintf("https://overfast-api.tekrop.fr/players/%s/stats/summary", battletag)
 	fmt.Println("Fetching player stats data from API:", url)
 	res, err := http.Get(url)
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("player stats not found")
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	defer res.Body.Close()
 	var data map[string]interface{}
 	json.NewDecoder(res.Body).Decode(&data)
@@ -80,11 +92,11 @@ func cacheWrite(key string, data map[string]interface{}) {
 
 // API Endpoint: Get player stats
 // battletag_summary
-func getPlayerSummary(c *gin.Context) {
+func getPlayerCareerSummary(c *gin.Context) {
 	battletag := c.Param("battletag")
 
 	// 1️ Check Redis Cache
-	cached, cachedData := cacheRead(battletag + "_summary")
+	cached, cachedData := cacheRead(battletag + "_career_summary")
 	if cached {
 		c.JSON(200, gin.H{"source": "cache", "data": cachedData})
 		return
@@ -94,7 +106,8 @@ func getPlayerSummary(c *gin.Context) {
 	log.Println("Cache miss for battletag:", battletag) // Debug statement
 
 	//Fetch from External API if Cache Miss
-	playerStats, err := fetchPlayerSummary(battletag)
+	playerStats, err := fetchPlayerCareerSummary(battletag)
+
 	if err != nil {
 		log.Println("Error fetching player stats from API:", err) // Debug statement
 		c.JSON(500, gin.H{"error": "Failed to fetch player stats"})
@@ -102,7 +115,7 @@ func getPlayerSummary(c *gin.Context) {
 	}
 
 	//Store in Cache (Set TTL for 10 minutes)
-	cacheWrite(battletag+"_summary", playerStats)
+	cacheWrite(battletag+"_career_summary", playerStats)
 
 	// Return the Data
 	c.JSON(200, gin.H{"source": "API", "data": playerStats})
@@ -111,7 +124,6 @@ func getPlayerSummary(c *gin.Context) {
 func getPlayerStats(c *gin.Context) {
 	battletag := c.Param("battletag")
 
-	// 1️ Check Redis Cache
 	// 1️ Check Redis Cache
 	cached, cachedData := cacheRead(battletag + "_stats")
 	if cached {
@@ -124,6 +136,7 @@ func getPlayerStats(c *gin.Context) {
 
 	// 2 Fetch from External API
 	playerStats, err := fetchPlayerStats(battletag)
+
 	if err != nil {
 		log.Println("Error fetching player stats from API:", err) // Debug statement
 		c.JSON(500, gin.H{"error": "Failed to fetch player stats"})
@@ -138,9 +151,20 @@ func getPlayerStats(c *gin.Context) {
 }
 
 func main() {
-
 	r := gin.Default()
-	r.GET("/api/players/:battletag", getPlayerSummary)
+
+	// Enable CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5174"}, // Allow frontend to access backend
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	r.GET("/api/players/:battletag", getPlayerCareerSummary)
 	r.GET("/api/players/stats/:battletag", getPlayerStats)
+
 	r.Run(":8080") // Running on localhost:8080
 }
