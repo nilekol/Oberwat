@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
     query = query.replace("#", "-");
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/players/${query}`);
+      const response = await axios.get(`http://localhost:8080/api/players/${query}/summary`);
       console.log(response.data);
       // Navigate and pass the data to the new page
       
@@ -35,8 +35,8 @@ const Navbar: React.FC = () => {
           <Name />
         </Link>
         <div className="navbar-tabs">
-          <Link to="/tab1" className="navbar-tab">Heroes</Link>
-          <Link to="/tab2" className="navbar-tab">Maps</Link>
+          <Link to="/Heroes" className="navbar-tab">Heroes</Link>
+          <Link to="/Maps" className="navbar-tab">Maps</Link>
           <Link to="/tab3" className="navbar-tab">About Me</Link>
         </div>
         <div className="search-bar-container">

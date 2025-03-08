@@ -1,6 +1,8 @@
-//import SearchBar from '../components/SearchBar';
-//import Name from '../components/Name';
+
 import Navbar from '../components/Navbar';
+import "./../styles/Home.css"
+
+
 
 function Home() {
     return (

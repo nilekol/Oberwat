@@ -63,6 +63,26 @@ func fetchPlayerStats(battletag string) (map[string]interface{}, error) {
 
 }
 
+func fetchPlayerGeneralSummary(battletag string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("https://overfast-api.tekrop.fr/players/%s/summary", battletag)
+	fmt.Println("Fetching player general summary data from API:", url)
+	res, err := http.Get(url)
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("player general summary not found")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	var data map[string]interface{}
+	json.NewDecoder(res.Body).Decode(&data)
+	return data, nil
+
+}
+
 // Cache Functions
 
 // Check if data is present in Redis Cache. If not present, return false.
@@ -150,21 +170,52 @@ func getPlayerStats(c *gin.Context) {
 	c.JSON(200, gin.H{"source": "API", "data": playerStats})
 }
 
+func getPlayerGeneralSummary(c *gin.Context) {
+	battletag := c.Param("battletag")
+
+	cached, cachedData := cacheRead(battletag + "_general_summary")
+	if cached {
+		c.JSON(200, gin.H{"source": "cache", "data": cachedData})
+		return
+	}
+
+	// Cache miss
+	log.Println("Cache miss for player stats:", battletag) // Debug statement
+
+	playerStats, err := fetchPlayerGeneralSummary(battletag)
+
+	if err != nil {
+		log.Println("Error fetching player general summary from API:", err) // Debug statement
+		c.JSON(500, gin.H{"error": "Failed to fetch player stats"})
+		return
+	}
+
+	// 3 Store in Cache
+	cacheWrite(battletag+"_general_summary", playerStats)
+
+	// 4 Return the Data
+	c.JSON(200, gin.H{"source": "API", "data": playerStats})
+
+}
+
 func main() {
 	r := gin.Default()
 
 	// Enable CORS
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5174"}, // Allow frontend to access backend
+		AllowOriginFunc: func(origin string) bool {
+			return true // Allow all origins
+		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
+		AllowCredentials: true, // Only enable this if you need authentication cookies or headers
 		MaxAge:           12 * time.Hour,
 	}))
 
 	r.GET("/api/players/:battletag", getPlayerCareerSummary)
 	r.GET("/api/players/stats/:battletag", getPlayerStats)
+	r.GET("/api/players/:battletag/summary", getPlayerGeneralSummary)
 
 	r.Run(":8080") // Running on localhost:8080
 }
