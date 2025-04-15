@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -199,6 +200,12 @@ func getPlayerGeneralSummary(c *gin.Context) {
 }
 
 func main() {
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // default port
+	}
+
 	r := gin.Default()
 
 	// Enable CORS
@@ -217,5 +224,5 @@ func main() {
 	r.GET("/api/players/stats/:battletag", getPlayerStats)
 	r.GET("/api/players/:battletag/summary", getPlayerGeneralSummary)
 
-	r.Run(":8080") // Running on localhost:8080
+	r.Run(":" + port)
 }
